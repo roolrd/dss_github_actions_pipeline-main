@@ -1,0 +1,107 @@
+name: CI
+
+on: [push, pull_request]
+
+env:
+  DSS_PROJECT: DKU_CHURN
+  DESIGN_URL: http://10.0.0.4:10000
+  DESIGN_API_KEY: ${{ secrets.DESIGN_API_KEY }}
+  AUTO_PREPROD_ID: auto-preprod
+  AUTO_PREPROD_URL: http://10.0.0.8:10000
+  AUTO_PREPROD_API_KEY: ${{ secrets.AUTO_PREPROD_API_KEY }}
+  AUTO_PROD_ID: auto-prod
+  AUTO_PROD_API_KEY: ${{ secrets.AUTO_PROD_API_KEY }}
+  AUTO_PROD_URL: http://10.0.0.9:10000
+
+jobs:
+  PREPARE:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt
+    - name: Set bundle id
+      id: bundle
+      run: |
+        echo "::set-output name=bundle::bundle_$(date +%Y-%m-%d_%H-%m-%S)"
+    - name: Print environment
+      run: printenv
+
+  VALIDATE:
+    needs: PREPARE
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Run pytest
+      run: |
+        python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
+
+  PACKAGE:
+    needs: [VALIDATE, PREPARE]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Create bundle
+      run: |
+        python 2_package_bundle/run_bundling.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ needs.PREPARE.outputs.bundle }}'
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: bundle
+        path: '${{ needs.PREPARE.outputs.bundle }}.zip'
+
+  PREPROD:
+    needs: [PACKAGE, PREPARE]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: bundle
+    - name: Upload in preprod
+      run: |
+        python 3_preprod_test/import_bundle.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ needs.PREPARE.outputs.bundle }}' '${{ env.AUTO_PREPROD_ID }}'
+    - name: Run tests
+      run: |
+        python -m pytest 3_preprod_test/run_test.py -o junit_family=xunit1 --host='${{ env.AUTO_PREPROD_URL }}' --api='${{ env.AUTO_PREPROD_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PREPROD_TEST.xml
+
+  PRODUCTION:
+    needs: [PREPROD, PREPARE]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: bundle
+    - name: Upload in Prod
+      run: |
+        python 4_deploy_prod/deploy_bundle.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ needs.PREPARE.outputs.bundle }}' '${{ env.AUTO_PROD_ID }}' '${{ env.AUTO_PROD_URL }}' '${{ env.AUTO_PROD_API_KEY }}'

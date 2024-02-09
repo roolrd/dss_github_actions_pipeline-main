@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   DSS_PROJECT: DKU_CHURN
   DESIGN_URL: https://dss-b51b6a96-f56c1b41-dku.us-east-1.app.dataiku.io
-  DESIGN_API_KEY: ${secrets.DESIGNAPIKEY}
+  DESIGN_API_KEY: ${{ secrets.DESIGNAPIKEY }}
   API_SERVICE_ID: api-service-churn
   API_ENDPOINT_ID: churn-model
   API_INFRA_ID: api_space-f56c1b41-dku_node-b51b6a96

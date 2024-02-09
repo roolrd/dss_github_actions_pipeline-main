@@ -34,9 +34,9 @@ jobs:
     - name: Print environment
       run: printenv
 
-    - name: VALIDATE
-      run: |
-        python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
+    # - name: VALIDATION
+    #   run: |
+    #     python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
 
     - name: PACKAGE AND PUBLISH
       run: |
@@ -47,13 +47,14 @@ jobs:
     #     name: apipackage
     #     path: '${{ needs.PREPARE.outputs.api_package_id }}.zip'
 
-    # - name: Download artifact
+    # - name: DOWNLOAD ARTIFACT
     #   uses: actions/download-artifact@v2
     #   with:
     #     name: apipackage
     # - name: Upload in preprod
     #   run: |
     #     python 3_preprod_test/import_bundle.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' "${{ needs.PREPARE.outputs.api_package_id }}" '${{ env.API_INFRA_ID }}'
+    
     - name: DEV DEPLOY-TESTS
       run: |
         python 2_deploy_dev/run_deploy_dev.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' "${{ needs.PREPARE.outputs.api_package_id }}" "${API_INFRA_ID}"

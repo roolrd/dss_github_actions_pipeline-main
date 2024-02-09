@@ -7,7 +7,7 @@ project = sys.argv[3]
 api_service_id = sys.argv[4]
 api_package_id = sys.argv[5]
 infra_dev_id = sys.argv[6]
-infra_prod_id = sys.argv[7]
+# infra_prod_id = sys.argv[7]
 
 client = dataikuapi.DSSClient(host, apiKey)
 test_project = client.get_project(project)

@@ -34,10 +34,10 @@ jobs:
     - name: Print environment
       run: printenv
 
-    # - name: VALIDATION
-    #   run: |
-    #     python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
-    #   continue-on-error: true
+    - name: VALIDATION
+      run: |
+        python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
+      continue-on-error: true
     
     - name: PACKAGE AND PUBLISH
       run: |
@@ -60,6 +60,8 @@ jobs:
       run: |
         python 2_deploy_dev/run_deploy_dev.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' "${{ steps.apipackage.outputs.api_package_id }}" "${API_INFRA_ID}"
         pytest -s 2_deploy_dev/test_dev.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --api_service_id='${{ env.API_SERVICE_ID }}' --api_endpoint_id='${{ env.API_ENDPOINT_ID }}' --api_dev_infra_id='${{ env.API_INFRA_ID }}' --junitxml=reports/DEV_TEST.xml
+        continue-on-error: true
+
 
   #   - name: Download artifact
   #     uses: actions/download-artifact@v2

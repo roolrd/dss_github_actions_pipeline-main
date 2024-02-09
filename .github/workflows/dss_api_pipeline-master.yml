@@ -37,15 +37,16 @@ jobs:
     # - name: VALIDATION
     #   run: |
     #     python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
-
+    #   continue-on-error: true
+    
     - name: PACKAGE AND PUBLISH
       run: |
-        python 1_package_and_publish/run_packaging.py "${{ env.DESIGN_URL }}" "${{ env.DESIGN_API_KEY }}" "${{ env.DSS_PROJECT }}" "${{ env.API_SERVICE_ID }}" "${{ needs.PREPARE.outputs.api_package_id }}" "${{ env.API_INFRA_ID }}"
+        python 1_package_and_publish/run_packaging.py "${{ env.DESIGN_URL }}" "${{ env.DESIGN_API_KEY }}" "${{ env.DSS_PROJECT }}" "${{ env.API_SERVICE_ID }}" "${{ steps.apipackage.outputs.api_package_id }}" "${{ env.API_INFRA_ID }}"
     # - name: Upload artifact
     #   uses: actions/upload-artifact@v2
     #   with:
     #     name: apipackage
-    #     path: '${{ needs.PREPARE.outputs.api_package_id }}.zip'
+    #     path: '${{ steps.apipackage.outputs.api_package_id }}.zip'
 
     # - name: DOWNLOAD ARTIFACT
     #   uses: actions/download-artifact@v2
@@ -53,20 +54,20 @@ jobs:
     #     name: apipackage
     # - name: Upload in preprod
     #   run: |
-    #     python 3_preprod_test/import_bundle.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' "${{ needs.PREPARE.outputs.api_package_id }}" '${{ env.API_INFRA_ID }}'
+    #     python 3_preprod_test/import_bundle.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' "${{ steps.apipackage.outputs.api_package_id }}" '${{ env.API_INFRA_ID }}'
     
     - name: DEV DEPLOY-TESTS
       run: |
-        python 2_deploy_dev/run_deploy_dev.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' "${{ needs.PREPARE.outputs.api_package_id }}" "${API_INFRA_ID}"
-        pytest -s 2_deploy_dev/test_dev.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --api_service_id='${{ env.API_SERVICE_ID }}' --api_endpoint_id='${{ env.API_ENDPOINT_ID }}' --api_dev_infra_id='${API_INFRA_ID}' --junitxml=reports/DEV_TEST.xml
+        python 2_deploy_dev/run_deploy_dev.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' "${{ steps.apipackage.outputs.api_package_id }}" "${API_INFRA_ID}"
+        pytest -s 2_deploy_dev/test_dev.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --api_service_id='${{ env.API_SERVICE_ID }}' --api_endpoint_id='${{ env.API_ENDPOINT_ID }}' --api_dev_infra_id='${{ env.API_INFRA_ID }}' --junitxml=reports/DEV_TEST.xml
 
   #   - name: Download artifact
   #     uses: actions/download-artifact@v2
   #     with:
   #       name: apipackage
-  #   - name: Upload in Prod
+  #   - name: DEPLOY TO PROD
   #     run: |
-  #       python 3_deploy_prod/run_deploy_prod.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' '${{ needs.PREPARE.outputs.api_package_id }}' '${{ env.API_INFRA_ID }}'
+  #       python 3_deploy_prod/run_deploy_prod.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' '${{ steps.apipackage.outputs.api_package_id }}' '${{ env.API_INFRA_ID }}'
 
     - name: Test results
       uses: actions/upload-artifact@v2

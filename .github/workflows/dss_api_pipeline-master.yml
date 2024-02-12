@@ -70,7 +70,7 @@ jobs:
   #       name: apipackage
   #   - name: DEPLOY TO PROD
   #     run: |
-  #       python 3_deploy_prod/run_deploy_prod.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' '${{ needs.PREPARE.outputs.api_package_id }}' '${{ env.API_INFRA_ID }}'
+  #       python 3_deploy_prod/run_deploy_prod.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' '${{ needs.PREPARE.outputs.api_package_id }}' '${{ env.API_INFRA_PROD_ID }}'
 
     - name: Test results
       uses: actions/upload-artifact@v2

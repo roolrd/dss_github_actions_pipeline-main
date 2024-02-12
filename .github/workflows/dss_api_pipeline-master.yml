@@ -31,15 +31,13 @@ jobs:
     - name: Set API package ID
       id: apipackage
       run: |
-        # echo "::set-output name=api_package_id::${API_SERVICE_ID}_v$(date +%Y-%m-%d_%H-%M-%S)"
-        echo "{api_package_id}={${API_SERVICE_ID}_v$(date +%Y-%m-%d_%H-%M-%S)}" >> $GITHUB_OUTPUT
+        echo "api_package_id=${API_SERVICE_ID}_v$(date +%Y-%m-%d_%H-%M-%S)" >> "$GITHUB_OUTPUT"
     - name: Print environment
       run: printenv
 
     - name: VALIDATION
       run: |
         python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
-      continue-on-error: true
     
     - name: PACKAGE AND PUBLISH
       run: |

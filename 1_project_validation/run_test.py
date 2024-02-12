@@ -2,8 +2,7 @@ import dataikuapi
 import radon.raw as cc_raw
 import radon.visitors as cc_visitors
 import warnings
-
-warnings.filterwarnings("ignore", message="datetime.datetime.utcfromtimestamp() is deprecated")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def TEST_scenario(params):
     client = dataikuapi.DSSClient(params["host"], params["api"])

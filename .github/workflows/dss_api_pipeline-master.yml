@@ -5,12 +5,13 @@ on: [push, pull_request]
 env:
   DSS_PROJECT: DKU_CHURN
   DESIGN_URL: https://dss-b51b6a96-f56c1b41-dku.us-east-1.app.dataiku.io
-  DESIGN_API_KEY: ${{ secrets.DESIGNAPIKEY }}
+  DESIGN_API_KEY: ${{ secrets.API_KEY }}
+  # DESIGN_API_KEY: ${{ secrets.DESIGNAPIKEY }}
   API_SERVICE_ID: api-service-churn
   API_ENDPOINT_ID: churn-model
   API_INFRA_ID: api_space-f56c1b41-dku_node-b51b6a96
   API_INFRA_PROD_ID: api_space-f56c1b41-dku_node-b51b6a96  #should differ with API_INFRA_ID
-  # API_KEY: ${{ secrets.API_KEY }}
+  API_KEY: ${{ secrets.API_KEY }}
 
 jobs:
   DSS_API_SERVICE:
@@ -38,7 +39,6 @@ jobs:
     - name: VALIDATION
       run: |
         python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ env.DESIGN_URL }}' --api='${{ env.DESIGN_API_KEY }}' --project='${{ env.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
-      continue-on-error: true
         
     - name: PACKAGE AND PUBLISH
       run: |

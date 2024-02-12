@@ -22,7 +22,7 @@ def TEST_scenario(params):
     assert smoketest_scenario, "You need at least one smoke test scenario (name 'TEST_SMOKE')"
 
     
-def TEST_coding_recipes_complexity(params):
+def test_coding_recipes_complexity(params):
     client = dataikuapi.DSSClient(params["host"], params["api"])
     project = client.get_project(params["project"])
 

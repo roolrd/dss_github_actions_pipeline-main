@@ -9,6 +9,7 @@ env:
   API_SERVICE_ID: api-service-churn
   API_ENDPOINT_ID: churn-model
   API_INFRA_ID: api_space-f56c1b41-dku_node-b51b6a96
+  API_INFRA_PROD_ID: api_space-f56c1b41-dku_node-b51b6a96  #should differ with API_INFRA_ID
   # API_KEY: ${{ secrets.API_KEY }}
 
 jobs:
@@ -30,7 +31,8 @@ jobs:
     - name: Set API package ID
       id: apipackage
       run: |
-        echo "::set-output name=api_package_id::${API_SERVICE_ID}_v$(date +%Y-%m-%d_%H-%M-%S)"
+        # echo "::set-output name=api_package_id::${API_SERVICE_ID}_v$(date +%Y-%m-%d_%H-%M-%S)"
+        echo "{api_package_id}={${API_SERVICE_ID}_v$(date +%Y-%m-%d_%H-%M-%S)}" >> $GITHUB_OUTPUT
     - name: Print environment
       run: printenv
 
@@ -41,7 +43,7 @@ jobs:
     
     - name: PACKAGE AND PUBLISH
       run: |
-        python 1_package_and_publish/run_packaging.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' '${{ steps.apipackage.outputs.api_package_id }}' '${{ env.API_INFRA_ID }}'
+        python 1_package_and_publish/run_packaging.py '${{ env.DESIGN_URL }}' '${{ env.DESIGN_API_KEY }}' '${{ env.DSS_PROJECT }}' '${{ env.API_SERVICE_ID }}' '${{ steps.apipackage.outputs.api_package_id }}' '${{ env.API_INFRA_ID }}' '${{ env.API_INFRA_PROD_ID }}'
     # - name: Upload artifact
     #   uses: actions/upload-artifact@v2
     #   with:
